@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import BuyCredit from "./pages/BuyCredit";
 import Result from "./pages/Result";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/buy-credit" element={<BuyCredit />} />
           <Route path="/result" element={<Result />} />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </div>
   );
