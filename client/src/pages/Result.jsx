@@ -1,14 +1,28 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { assets } from "../assets/assets";
 import { motion } from "motion/react";
+import { AppContext } from "../context/AppContext";
 
 function Result() {
   const [image, setImage] = useState(assets.sample_img_1);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState("");
+  const { generateImage } = useContext(AppContext);
 
-  const onSubmitHandler = async (e) => {};
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (input) {
+      const image = await generateImage(input);
+      if (image) {
+        setIsImageLoaded(true);
+        setImage(image);
+      }
+    }
+    setLoading(false);
+  };
 
   return (
     <motion.form
@@ -41,7 +55,7 @@ function Result() {
             placeholder="Describe what you want to generate"
           />
           <button
-            className="bg-zinc-900 px-10 sm:px-16 py-3 rounded-full"
+            className="bg-zinc-900 px-10 sm:px-16 py-3 rounded-full cursor-pointer"
             type="submit"
           >
             Generate
