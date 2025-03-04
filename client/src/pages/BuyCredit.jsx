@@ -2,9 +2,53 @@ import React, { useContext } from "react";
 import { assets, plans } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
 import { motion } from "motion/react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 function BuyCredit() {
-  const { user } = useContext(AppContext);
+  const { user, backendUrl, loadCreditsData, token, setShowLogin } =
+    useContext(AppContext);
+
+  const navigate = useNavigate();
+
+  const initPay = async (order) => {
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Credits Payment",
+      description: "Credits Payment",
+      order_id: order.id,
+      receipt: order.receipt,
+      handler: async (response) => {
+        console.log(response);
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
+  const paymentRazorpay = async (planId) => {
+    try {
+      if (!user) {
+        setShowLogin(true);
+      }
+
+      const { data } = await axios.post(
+        backendUrl + "/api/user/pay-razor",
+        { planId },
+        { headers: { token } }
+      );
+
+      if (data.success) {
+        initPay(data.order);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <motion.div
@@ -31,10 +75,13 @@ function BuyCredit() {
             <p className="mt-3 mb-1 font-semibold">{data.id}</p>
             <p className="text-sm">{data.desc}</p>
             <p className="mt-6">
-              <span className="text-3xl font-medium">${data.price}</span> /{" "}
+              <span className="text-3xl font-medium">${data.price}</span> /
               {data.credits} credits
             </p>
-            <button className="w-full bg-gray-800 text-white mt-8 text-sm rounded-md py-2.5 min-w-52">
+            <button
+              onClick={() => paymentRazorpay(data.id)}
+              className="w-full bg-gray-800 text-white mt-8 text-sm rounded-md py-2.5 min-w-52 cursor-pointer"
+            >
               {user ? "Purchase" : "Get Started"}
             </button>
           </div>
